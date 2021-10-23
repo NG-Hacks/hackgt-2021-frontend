@@ -8,31 +8,20 @@
   };
 
   outputs = { self, nixpkgs, utils, compat }:
-    {
-      overlay = final: prev: {
-        frontend = final.callPackage ./default.nix { };
-      };
-    } //
-    (utils.lib.eachDefaultSystem (system:
+    utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [
-            self.overlay
-          ];
         };
       in
       {
-        defaultPackage = pkgs.callPackage ./default.nix { };
         devShell = pkgs.mkShell {
           buildInputs = [
-            pkgs.frontend
-
             pkgs.yarn
             pkgs.nodejs
             pkgs.yarn2nix
           ];
         };
-      })
+      }
     );
 }
