@@ -1,45 +1,35 @@
-// include three js
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { init } from "./cone";
 
-// Scene
-const scene = new THREE.Scene();
+function angleFromCoordinate(lat1, lon1, lat2, lon2) {
+  var dLon = ((lon2 - lon1) * Math.PI) / 180;
+  var y = Math.sin(dLon) * Math.cos(lat2);
+  var x =
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
 
-// Add a cube to the scene
-const geometry = new THREE.BoxGeometry(1, 1, 1); // width, height, depth
-const material = new THREE.MeshLambertMaterial({ color: 0xfb8e00 });
-const mesh = new THREE.Mesh(geometry, material);
-mesh.position.set(0, 0, 0);
-scene.add(mesh);
+  return (Math.atan2(y, x) * 180) / Math.PI;
+}
 
-// Set up lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambientLight);
+function showPosition(position) {
+  var current = new google.maps.LatLng(
+    position.coords.latitude,
+    position.coords.longitude
+  );
+  var goal = new google.maps.LatLng(-33.8688, 151.2195);
+  var angle = angleFromCoordinate(
+    current.lat(),
+    current.lng(),
+    goal.lat(),
+    goal.lng()
+  );
+  console.log("Current location:", current.lat(), current.lng());
+  console.log("Goal location:", goal.lat(), goal.lng());
+  console.log("Angle to goal:", angle);
+  init(angle);
+}
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
-directionalLight.position.set(10, 20, 0); // x, y, z
-scene.add(directionalLight);
+function showError(error) {
+  console.log("getCurrentPosition returned error", error);
+}
 
-// Camera
-const width = 10;
-const height = width * (window.innerHeight / window.innerWidth);
-const camera = new THREE.OrthographicCamera(
-  width / -2, // left
-  width / 2, // right
-  height / 2, // top
-  height / -2, // bottom
-  1, // near
-  100 // far
-);
-camera.position.set(4, 4, 4);
-camera.lookAt(0, 0, 0);
-
-// Renderer
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setClearColor(0xffffff, 0);
-scene.background = null;
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.render(scene, camera);
-
-// Add it to HTML
-document.body.appendChild(renderer.domElement);
+navigator.geolocation.getCurrentPosition(showPosition, showError);
