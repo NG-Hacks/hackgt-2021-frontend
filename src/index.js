@@ -15,7 +15,14 @@ function showPosition(position) {
     position.coords.latitude,
     position.coords.longitude
   );
-  var goal = new google.maps.LatLng(-33.8688, 151.2195);
+
+  // random goal location to show rotation
+  // var goal = new google.maps.LatLng(33.8688, -85.2195);
+  var goal = new google.maps.LatLng(
+    Math.random() * 180 - 90,
+    Math.random() * 360 - 180
+  );
+
   var angle = angleFromCoordinate(
     current.lat(),
     current.lng(),
@@ -32,4 +39,6 @@ function showError(error) {
   console.log("getCurrentPosition returned error", error);
 }
 
-navigator.geolocation.getCurrentPosition(showPosition, showError);
+var intervalId = window.setInterval(async function () {
+  await navigator.geolocation.getCurrentPosition(showPosition, showError);
+}, 500);
